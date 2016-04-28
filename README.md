@@ -1,1 +1,1 @@
-# JSCallendar
+# JSCalendar
