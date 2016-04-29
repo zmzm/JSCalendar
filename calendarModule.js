@@ -1,8 +1,8 @@
 'use strict';
 var calendarModule = (function (api) {
 	var events = [],
-	eventsByDate = [],
-	id = 1;
+	eventsByDate = [];
+	localStorage.setItem("ID", 0);
 	var _monthByNumber = function (monthNumber) {
 		var months = new Array(12);
 		months[0] = "January";
@@ -109,18 +109,16 @@ var calendarModule = (function (api) {
 		return eventsInRange;
 	};
 	var _eventReminder = function (date, event) {
-		var refresh = 1000;
+		var refresh = 0;
+		var current = new Date();
 		if (event.pending) {
-			var current = new Date();
 			date = new Date(date);
 			refresh = date.getTime() - current.getTime();
 			console.log(refresh);
 			current = current.getTime() + refresh;
 			if (refresh > 0) {
 				setTimeout(function () {
-					console.log("Current: " + current + " Date: " + date + (current >= date.getTime()));
 					if ((current >= date.getTime())) {
-						date = 0;
 						event.pending = false;
 						alert(event.name + " | " + event.about);
 					}
@@ -129,6 +127,61 @@ var calendarModule = (function (api) {
 				event.pending = false;
 			}
 		}
+	};
+	var _validateTime = function (time) {
+		var errorMsg = "",
+		regs = "",
+		re = /^(\d{1,2}):(\d{2})$/;
+		if (time !== '') {
+			if (time.match(re)) {
+				regs = time.match(re);
+				if (regs[1] > 23 || regs[1] < 0) {
+					errorMsg = "Invalid value for hours: " + regs[1] + "\n";
+				}
+				if (regs[2] > 59 || regs[2] < 0) {
+					errorMsg += "Invalid value for minutes: " + regs[2];
+				}
+			} else {
+				errorMsg = "Invalid time format: " + time;
+			}
+		} else {
+			errorMsg = "Empty time not allowed!";
+		}
+		if (errorMsg !== "") {
+			alert(errorMsg);
+			return false;
+		}
+		return true;
+	};
+	var _validateDate = function (date) {
+		var minYear = 2000,
+		maxYear = (new Date()).getFullYear(),
+		errorMsg = "",
+		regs = [],
+		re = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+		if (date !== '') {
+			if (date.match(re)) {
+				regs = date.match(re);
+				if (regs[1] < 1 || regs[1] > 31) {
+					errorMsg += "Invalid value for day: " + regs[1] + "\n";
+				}
+				if (regs[2] < 1 || regs[2] > 12) {
+					errorMsg += "Invalid value for month: " + regs[2] + "\n";
+				}
+				if (regs[3] < minYear || regs[3] > maxYear) {
+					errorMsg += "Invalid value for year: " + regs[3] + " - must be between " + minYear + " and " + maxYear;
+				}
+			} else {
+				errorMsg = "Invalid date format: " + date;
+			}
+		} else {
+			errorMsg = "Empty date not allowed!";
+		}
+		if (errorMsg !== "") {
+			alert(errorMsg);
+			return false;
+		}
+		return true;
 	};
 	api.getAllEvents = function () {
 		return events;
@@ -166,19 +219,22 @@ var calendarModule = (function (api) {
 		return _getEventsInRange(start, end);
 	};
 	api.addEvent = function (name, time, about, date) {
-		localStorage.setItem("ID", id++);
-		time = time || "12:00";
-		var event = {
-			id : localStorage.getItem("ID"),
-			name : name,
-			startDate : Date.parse(date + " " + time) || " ",
-			time : time,
-			pending : true,
-			remindBefore : false,
-			about : about || ""
-		};
-		events.push(event);
-		_eventReminder(event.startDate, event);
+		var event = {},
+		localId = localStorage.getItem("ID");
+		if (_validateTime(time) && _validateDate(date)) {
+			localStorage.setItem("ID", ++localId);
+			event = {
+				id : localStorage.getItem("ID"),
+				name : name,
+				startDate : Date.parse(date + " " + time) || "",
+				time : time,
+				pending : true,
+				remindBefore : false,
+				about : about || ""
+			};
+			events.push(event);
+			_eventReminder(event.startDate, event);
+		}
 		return event;
 	};
 	api.getEventsByMonth = function () {

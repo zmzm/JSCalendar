@@ -17,25 +17,19 @@
 		<form style="clear:both;">
 			<h2>Create event</h2>
 			<input type="text" id="name" placeholder="Event"/>
-			<input type="text" id="date" placeholder="2016-04-23"/>
+			<input type="text" id="date" placeholder="23/04/2016"/>
 			<input type="text" id="time" placeholder="15:00"/>
 			<br/><br/>
 			<input type="button" style="margin-left: 295px;" value="Create" id="create"></button>
 		</form>
-		<!-- <form style="clear:both;">
-			<h2>Get events by date</h2>
-			<input type="text" id="eventsDate" placeholder="2016-04-23"/>
-			<br/><br/>
-			<input type="button" style="margin-left: 135px;" value="Get" id="getByDate"></button>
-		</form> -->
         <script type="text/javascript">
             calendarModule.init();
-			//calendarModule.addEvent("Event1", "22/04/2016", " 15:11", "First test event.");
-			//calendarModule.addEvent("Event2", "14:55", "Test event1.", "2016-04-27");
-			//calendarModule.addEvent("Event3", "14:54", "Test event2.", "2016-04-27");
+			calendarModule.addEvent("Event1", "22:22", "First test event.", "22/04/2016");
+			calendarModule.addEvent("Event2", "14:55", "Test event1.", "27/04/2016");
+			calendarModule.addEvent("Event3", "14:54", "Test event2.", "27/04/2016");
 			var events = calendarModule.getAllEvents();
-			//calendarModule.everyDayEvent("TestEvent", "12:58", "Repeat Event.");
-			//calendarModule.repeatByDays(["Monday", "Tuesday", "Wednesday", "Friday"], "15:01", {name: "TestEvent", about: "Repeat Event."});
+			//calendarModule.everyDayEvent("TestEvent", "12:58", "Repeat Event."); //Повторение события каждый день
+			calendarModule.repeatByDays(["Friday", "Saturday", "Sunday"], "15:01", {name: "TestEvent", about: "Repeat Event."}); //По выбранным дням недели
 			//calendarModule.remindBefoEvent(events[0], 2, 
 				//function () {
 					//alert("2 minutes left!!!!");
@@ -45,12 +39,8 @@
 					//alert("2 minutes left!!!!");
 				//}
 			//);
-			//calendarModule.addEvent("Event4", "2016-04-22", " 18:00","Go home!!!!");
-			//calendarModule.addEvent("Event5", "2016-04-23", " 15:00","Test event.");
-			//calendarModule.addEvent("Event6", "2016-04-25", " 10:00","Test event.");
-			//calendarModule.addEvent("Event7", "2016-05-22", " 18:00","Test event.");
 			
-			console.log(calendarModule.getAllEvents());
+			console.log(events);
 
 			$('#create').click( function() {
 				var eventName = $('#name').val();
@@ -60,10 +50,6 @@
 				console.log('*******************************');
 				console.log(calendarModule.getAllEvents());
 			});	
-			/*$('#getByDate').click( function() {
-				var eventDate = $('#eventsDate').val();
-				calendarModule.getEventsByDate(eventDate);
-			});	*/
 			$('#day').click( function() {
 				calendarModule.getEventsByDay();
 			});
