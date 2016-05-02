@@ -1,64 +1,28 @@
 <html>
-    <head>
-        <title>Event calendar</title>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
-		<script type="text/javascript" src="extendedCalendarModule.js"></script>
-		<script type="text/javascript" src="calendarModule.js"></script>
-    </head>
-   <body>
-		<input type="button" id="day" value="Day"></button>
-		<input type="button" id="week" value="Week"></button>
-		<input type="button" id="month" value="Month"></button>
-		<br/><br/>
-		<div id="calendar" style="float:left;"></div>
-		<div id="events_container" style="float:left; margin-left: 40px;" ></div>
-		<br/><br/>
-		<form style="clear:both;">
-			<h2>Create event</h2>
-			<input type="text" id="name" placeholder="Event"/>
-			<input type="text" id="date" placeholder="23/04/2016"/>
-			<input type="text" id="time" placeholder="15:00"/>
-			<br/><br/>
-			<input type="button" style="margin-left: 295px;" value="Create" id="create"></button>
-		</form>
-        <script type="text/javascript">
-            calendarModule.init();
-			calendarModule.addEvent("Event1", "22:22", "First test event.", "22/04/2016");
-			calendarModule.addEvent("Event2", "14:55", "Test event1.", "27/04/2016");
-			calendarModule.addEvent("Event3", "14:54", "Test event2.", "27/04/2016");
-			var events = calendarModule.getAllEvents();
-			//calendarModule.everyDayEvent("TestEvent", "12:58", "Repeat Event."); //Повторение события каждый день
-			calendarModule.repeatByDays(["Friday", "Saturday", "Sunday"], "15:01", {name: "TestEvent", about: "Repeat Event."}); //По выбранным дням недели
-			//calendarModule.remindBefoEvent(events[0], 2, 
-				//function () {
-					//alert("2 minutes left!!!!");
-			//});
-			//calendarModule.remindBeforeAllEvents(events, 2, 
-				//function () {
-					//alert("2 minutes left!!!!");
-				//}
-			//);
-			
-			console.log(events);
+<head>
+    <title>Event calendar</title>
+    <script type="text/javascript" src="extendedCalendarModule.js"></script>
+    <script type="text/javascript" src="calendarModule.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+    calendarModule.addEvent("Event1", "22:22", "First test event.", "05/03/2016");
+    calendarModule.addEvent("Event2", "16:55", "Test event1.", "05/03/2016");
+    calendarModule.addEvent("Event3", "17:54", "Test event2.", "05/02/2016");
+    var events = calendarModule.getAllEvents();
+    //calendarModule.repeatEventEveryDay("17:58", events[2]); //Повторение события каждый день
+    calendarModule.repeatByDays(["Friday", "Saturday", "Sunday"], "18:01", {name: "TestEvent", about: "Repeat Event."}); //По выбранным дням недели
+    //calendarModule.remindBefoEvent(events[0], 2,
+    //function () {
+    //alert("2 minutes left!!!!");
+    //}); //Оповещение до начала события
+    //calendarModule.remindBeforeAllEvents(events, 2,
+    //function () {
+    //alert("2 minutes left!!!!");
+    //}
+    //); //Оповещение до начала всех событий
 
-			$('#create').click( function() {
-				var eventName = $('#name').val();
-				var eventDate = $('#date').val();
-				var eventTime = $('#time').val();
-				calendarModule.addEvent(eventName, eventTime, "", eventDate);
-				console.log('*******************************');
-				console.log(calendarModule.getAllEvents());
-			});	
-			$('#day').click( function() {
-				calendarModule.getEventsByDay();
-			});
-			$('#week').click( function() {
-				calendarModule.getEventsByWeek();
-			});	
-			$('#month').click( function() {
-				calendarModule.getEventsByMonth();
-			});	
-        </script>
-    </body>
+    console.log(events);
+</script>
+</body>
 </html>
