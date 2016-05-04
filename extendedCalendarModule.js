@@ -48,11 +48,11 @@ var extendedCalendarModule = (function () {
         }
     };
     var _repeatEveyDay = function repeatEveyDay(time, event) {
-        var refresh = 1000,
+        var refresh = 0,
             date = new Date(),
             tomorrow = new Date(),
-            eventHour = time.slice(0, 2),
-            eventMinute = time.slice(3, 5),
+            eventHour = +time.slice(0, 2),
+            eventMinute = +time.slice(3, 5),
             eventSeconds = 0,
             hours = date.getHours(),
             minutes = date.getMinutes(),
@@ -64,16 +64,22 @@ var extendedCalendarModule = (function () {
             minutesDifferent = hourDifferent == 1 ? eventMinute + (60 - (minutes)) : eventMinute - minutes;
         if (hours > eventHour) {
             tomorrow.setDate(date.getDate() + 1);
-            tomorrow.setHours(+eventHour, +eventMinute, 0);
+            tomorrow.setHours(eventHour, eventMinute, 0);
             refresh = tomorrow - date.getTime();
         } else if (hours == eventHour && minutes + 1 > eventMinute) {
             tomorrow.setDate(date.getDate() + 1);
-            tomorrow.setHours(+eventHour, +eventMinute, 0);
+            tomorrow.setHours(eventHour, eventMinute, 0);
             refresh = tomorrow - date.getTime();
         } else {
-            refresh = date.getTime() + (hourDifferent * millisecondsInOneHour) + (minutesDifferent * millisecondsInMinute) - (seconds * millisecondsInSecond);
-            refresh = refresh - date.getTime();
-            tomorrow = new Date(date.getTime() + refresh);
+            if (hourDifferent == 1) {
+                refresh = date.getTime() + (minutesDifferent * millisecondsInMinute) - (seconds * millisecondsInSecond);
+                refresh = refresh - date.getTime();
+                tomorrow = new Date(date.getTime() + refresh);
+            } else {
+                refresh = date.getTime() + (hourDifferent * millisecondsInOneHour) + (minutesDifferent * millisecondsInMinute) - (seconds * millisecondsInSecond);
+                refresh = refresh - date.getTime();
+                tomorrow = new Date(date.getTime() + refresh);
+            }
         }
         if (refresh > 0) {
             setTimeout(function () {
@@ -85,7 +91,7 @@ var extendedCalendarModule = (function () {
         }
     };
     var _beforeEvent = function (event, time, callback) {
-        var refresh = 1000,
+        var refresh = 0,
             millisecondsInMinute = 60000,
             current = new Date();
         if (event.pending) {
