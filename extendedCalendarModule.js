@@ -1,13 +1,12 @@
 'use strict';
-var extendedCalendarModule = (function (api) {
-    var _weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-    var _refreshQueue = [];
+var extendedCalendarModule = (function () {
+    var _weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        _refreshQueue = [],
+        api = {};
     var _currentWeekDates = function (date) {
         var array = [],
-            firstday = new Date(date.setDate(date.getDate() - date.getDay() + 1)),
-            temp = new Date(firstday);
-        array.push(firstday);
-        for (var i = 2; i < 8; i++) {
+            temp = new Date(date);
+        for (var i = 1; i < 8; i++) {
             array.push(new Date(temp.setDate(temp.getDate() - temp.getDay() + i)));
         }
         return array;
@@ -17,7 +16,7 @@ var extendedCalendarModule = (function (api) {
         for (var i = 0; i < days.length; i++) {
             for (var j = 0; j < _weekDays.length; j++) {
                 if (days[i] == _weekDays[j]) {
-                    array.push(new Date(dates[j].toISOString().slice(0, 10) + " " + time));
+                    array.push(new Date(dates[j].toJSON().slice(0, 10) + " " + time));
                 }
             }
         }
@@ -25,11 +24,10 @@ var extendedCalendarModule = (function (api) {
     };
     var _repeatByDays = function repeatByDays(days, time, event) {
         var curr = new Date(),
-            tempCurr = new Date(curr),
             refresh = 0,
-            currentDates = [],
-            selectedDays = [];
-        currentDates = _currentWeekDates(tempCurr);
+            currentDates,
+            selectedDays;
+        currentDates = _currentWeekDates(curr);
         selectedDays = _selectedDates(days, currentDates, time);
         for (var i = 0; i < selectedDays.length; i++) {
             if (curr.getTime() > selectedDays[i].getTime()) {
@@ -52,6 +50,7 @@ var extendedCalendarModule = (function (api) {
     var _repeatEveyDay = function repeatEveyDay(time, event) {
         var refresh = 1000,
             date = new Date(),
+            tomorrow = new Date(),
             eventHour = time.slice(0, 2),
             eventMinute = time.slice(3, 5),
             eventSeconds = 0,
@@ -59,44 +58,39 @@ var extendedCalendarModule = (function (api) {
             minutes = date.getMinutes(),
             seconds = date.getSeconds(),
             hourDifferent = (hours > eventHour) ? -(hours - eventHour) : eventHour - hours,
-            millisecondsInOneDay = 3600000,
-            hoursInDay = 24,
+            millisecondsInOneHour = 3600000,
             millisecondsInSecond = 1000,
-            millisecondsInMinute = 60 * 1000,
+            millisecondsInMinute = 60000,
             minutesDifferent = hourDifferent == 1 ? eventMinute + (60 - (minutes)) : eventMinute - minutes;
-        if (event.pending) {
-            if (hours > eventHour) {
-                refresh = date.getTime() + (hourDifferent * millisecondsInOneDay) + (hoursInDay * millisecondsInOneDay) + (minutesDifferent * millisecondsInMinute) - (seconds * millisecondsInSecond);
-                refresh = refresh - date.getTime();
-                date = new Date(date.getTime() + refresh);
-            } else if (hours == eventHour && minutes + 1 > eventMinute) {
-                refresh = date.getTime() + (hoursInDay * millisecondsInOneDay) + (minutesDifferent * millisecondsInMinute) - (seconds * millisecondsInSecond);
-                refresh = refresh - date.getTime();
-                date = new Date(date.getTime() + refresh);
-            } else {
-                refresh = date.getTime() + ((eventHour - hours) * millisecondsInOneDay) + (minutesDifferent * millisecondsInMinute) - (seconds * millisecondsInSecond);
-                refresh = refresh - date.getTime();
-                date = new Date(date.getTime() + refresh);
-            }
-            if (refresh > 0) {
-                setTimeout(function () {
-                    if (date.getHours() == eventHour && date.getMinutes() == eventMinute && date.getSeconds() == eventSeconds) {
-                        console.log(event.name + " | " + event.about);
-                    }
-                    repeatEveyDay(time, event);
-                }, refresh);
-            }
+        if (hours > eventHour) {
+            tomorrow.setDate(date.getDate() + 1);
+            tomorrow.setHours(+eventHour, +eventMinute, 0);
+            refresh = tomorrow - date.getTime();
+        } else if (hours == eventHour && minutes + 1 > eventMinute) {
+            tomorrow.setDate(date.getDate() + 1);
+            tomorrow.setHours(+eventHour, +eventMinute, 0);
+            refresh = tomorrow - date.getTime();
+        } else {
+            refresh = date.getTime() + (hourDifferent * millisecondsInOneHour) + (minutesDifferent * millisecondsInMinute) - (seconds * millisecondsInSecond);
+            refresh = refresh - date.getTime();
+            tomorrow = new Date(date.getTime() + refresh);
+        }
+        if (refresh > 0) {
+            setTimeout(function () {
+                if (tomorrow.getHours() == eventHour && tomorrow.getMinutes() == eventMinute && tomorrow.getSeconds() == eventSeconds) {
+                    console.log(event.name + " | " + event.about);
+                }
+                repeatEveyDay(time, event);
+            }, refresh);
         }
     };
     var _beforeEvent = function (event, time, callback) {
         var refresh = 1000,
-            millisecondsInMinute = 60 * 1000,
+            millisecondsInMinute = 60000,
             current = new Date();
-        event.remindBefore = true;
         if (event.pending) {
             refresh = (event.startDate.getTime() - (time * millisecondsInMinute)) - current.getTime();
             console.log(refresh);
-            current = current.getTime() + refresh;
             if (refresh > 0) {
                 setTimeout(function () {
                     event.remindBefore = false;
@@ -147,7 +141,7 @@ var extendedCalendarModule = (function (api) {
             return event;
         }
     };
-    api.remindBefoEvent = function (event, time, callback) {
+    api.remindBeforeEvent = function (event, time, callback) {
         if (_validateTime(time)) {
             _beforeEvent(event, time, callback);
         }
@@ -158,4 +152,4 @@ var extendedCalendarModule = (function (api) {
         }
     };
     return api;
-})(extendedCalendarModule || {});
+})();

@@ -1,8 +1,7 @@
 'use strict';
 var calendarModule = (function (api) {
     var events = [],
-        eventsByDate = [];
-    localStorage.setItem("ID", 0);
+        id = 0;
     var _getEventsInRange = function (start, end) {
         var eventsInRange = [];
         for (var i = 0; i < events.length; i++) {
@@ -18,7 +17,6 @@ var calendarModule = (function (api) {
         if (event.pending) {
             date = new Date(date);
             refresh = date.getTime() - current.getTime();
-            console.log(refresh);
             current = current.getTime() + refresh;
             if (refresh > 0) {
                 setTimeout(function () {
@@ -112,17 +110,15 @@ var calendarModule = (function (api) {
         return _getEventsInRange(start, end);
     };
     api.addEvent = function (name, time, about, date) {
-        var event = {},
-            localId = localStorage.getItem("ID");
+        var event = {};
         if (_validateTime(time) && _validateDate(date)) {
-            localStorage.setItem("ID", ++localId);
             event = {
-                id: localStorage.getItem("ID"),
+                id: ++id,
                 name: name,
                 startDate: new Date(date + " " + time) || "",
                 time: time,
                 pending: true,
-                remindBefore: false,
+                remindBefore: true,
                 about: about || ""
             };
             events.push(event);
@@ -156,6 +152,7 @@ var calendarModule = (function (api) {
         for (var i = 0; i < events.length; i++) {
             if (events[i].id === event.id) {
                 events[i] = event;
+                return event;
             }
         }
     };
