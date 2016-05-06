@@ -29,16 +29,20 @@ var extendedCalendarModule = (function () {
             selectedDays;
         currentDates = _currentWeekDates(curr);
         selectedDays = _selectedDates(days, currentDates, time);
-        for (var i = 0; i < selectedDays.length; i++) {
-            if (curr.getTime() > selectedDays[i].getTime()) {
-                refresh = -1;
-            } else if (curr.getTime() < selectedDays[i].getTime()) {
-                refresh = selectedDays[i].getTime() - curr.getTime();
-                _refreshQueue.push(refresh);
+        if (selectedDays.length > 0) {
+            for (var i = 0; i < selectedDays.length; i++) {
+                if (curr.getTime() > selectedDays[i].getTime()) {
+                    refresh = -1;
+                } else if (curr.getTime() < selectedDays[i].getTime()) {
+                    refresh = selectedDays[i].getTime() - curr.getTime();
+                    _refreshQueue.push(refresh);
+                }
             }
+            _refreshQueue.sort();
+            refresh = Math.min.apply(Math, _refreshQueue);
+        } else {
+            console.log("Such days not found!");
         }
-        _refreshQueue.sort();
-        refresh = Math.min.apply(Math, _refreshQueue);
         if (refresh > 0) {
             setTimeout(function () {
                 console.log(event.name + " | " + event.about);
@@ -53,7 +57,6 @@ var extendedCalendarModule = (function () {
             tomorrow = new Date(),
             eventHour = +time.slice(0, 2),
             eventMinute = +time.slice(3, 5),
-            eventSeconds = 0,
             hours = date.getHours(),
             minutes = date.getMinutes(),
             seconds = date.getSeconds(),
@@ -74,18 +77,14 @@ var extendedCalendarModule = (function () {
             if (hourDifferent == 1) {
                 refresh = date.getTime() + (minutesDifferent * millisecondsInMinute) - (seconds * millisecondsInSecond);
                 refresh = refresh - date.getTime();
-                tomorrow = new Date(date.getTime() + refresh);
             } else {
                 refresh = date.getTime() + (hourDifferent * millisecondsInOneHour) + (minutesDifferent * millisecondsInMinute) - (seconds * millisecondsInSecond);
                 refresh = refresh - date.getTime();
-                tomorrow = new Date(date.getTime() + refresh);
             }
         }
         if (refresh > 0) {
             setTimeout(function () {
-                if (tomorrow.getHours() == eventHour && tomorrow.getMinutes() == eventMinute && tomorrow.getSeconds() == eventSeconds) {
-                    console.log(event.name + " | " + event.about);
-                }
+                console.log(event.name + " | " + event.about);
                 repeatEveyDay(time, event);
             }, refresh);
         }
@@ -96,7 +95,6 @@ var extendedCalendarModule = (function () {
             current = new Date();
         if (event.pending) {
             refresh = (event.startDate.getTime() - (time * millisecondsInMinute)) - current.getTime();
-            console.log(refresh);
             if (refresh > 0) {
                 setTimeout(function () {
                     event.remindBefore = false;
@@ -135,6 +133,28 @@ var extendedCalendarModule = (function () {
         }
         return true;
     };
+    var _validateMinutes = function (minutes) {
+        var errorMsg = "",
+            regs = "",
+            re = /^(\d{1,2})$/;
+        if (minutes !== '') {
+            if (minutes.match(re)) {
+                regs = minutes.match(re);
+                if (regs[1] < 5 || regs[1] > 50) {
+                    errorMsg = "Invalid value for minutes: " + regs[1] + " - must be between '5' and '50'";
+                }
+            } else {
+                errorMsg = "Invalid minutes format: " + minutes;
+            }
+        } else {
+            errorMsg = "Empty minutes not allowed!";
+        }
+        if (errorMsg !== "") {
+            console.log(errorMsg);
+            return false;
+        }
+        return true;
+    };
     api.repeatEventEveryDay = function (time, event) {
         if (_validateTime(time)) {
             _repeatEveyDay(time, event);
@@ -148,12 +168,12 @@ var extendedCalendarModule = (function () {
         }
     };
     api.remindBeforeEvent = function (event, time, callback) {
-        if (_validateTime(time)) {
+        if (_validateMinutes(time)) {
             _beforeEvent(event, time, callback);
         }
     };
     api.remindBeforeAllEvents = function (events, time, callback) {
-        if (_validateTime(time)) {
+        if (_validateMinutes(time)) {
             _beforeAllEvents(events, time, callback);
         }
     };

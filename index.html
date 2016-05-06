@@ -7,15 +7,15 @@
 <body>
 <script type="text/javascript">
     calendarModule.addEvent("Event1", "22:22", "First test event.", "05/05/2016");
-    calendarModule.addEvent("Event2", "16:55", "Test event1.", "05/03/2016");
-    calendarModule.addEvent("Event3", "17:14", "Test event2.", "05/04/2016");
+    //calendarModule.addEvent("Event2", "16:55", "Test event1.", "05/03/2016");
+    //calendarModule.addEvent("Event3", "17:14", "Test event2.", "05/04/2016");
     var events = calendarModule.getAllEvents();
-    calendarModule.repeatEventEveryDay("16:50", events[2]); //Повторение события каждый день
+    //calendarModule.repeatEventEveryDay("16:50", events[2]); //Повторение события каждый день
     //calendarModule.repeatByDays(["Friday", "Saturday", "Sunday"], "18:01", {name: "TestEvent", about: "Repeat Event."}); //По выбранным дням недели
-    //calendarModule.remindBeforeEvent(events[0], 2,
-    //function () {
-    //alert("2 minutes left!!!!");
-    //}); //Оповещение до начала события
+    calendarModule.remindBeforeEvent(events[0], '15',
+            function () {
+                alert("2 minutes left!!!!");
+            }); //Оповещение до начала события
     //calendarModule.remindBeforeAllEvents(events, 2,
     //function () {
     //alert("2 minutes left!!!!");

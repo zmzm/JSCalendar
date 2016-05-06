@@ -5,25 +5,21 @@ var calendarModule = (function (api) {
     var _getEventsInRange = function (start, end) {
         var eventsInRange = [];
         for (var i = 0; i < events.length; i++) {
-            if (Date.parse(event[i].startDate) >= Date.parse(start) && Date.parse(event[i].startDate) <= Date.parse(end)) {
-                eventsInRange.push(event);
+            if (Date.parse(events[i].startDate) >= Date.parse(start) && Date.parse(events[i].startDate) <= Date.parse(end)) {
+                eventsInRange.push(events[i]);
             }
         }
         return eventsInRange;
     };
     var _eventReminder = function (date, event) {
-        var refresh = 0;
-        var current = new Date();
+        var refresh = 0,
+            current = new Date();
         if (event.pending) {
-            date = new Date(date);
             refresh = date.getTime() - current.getTime();
-            current = current.getTime() + refresh;
             if (refresh > 0) {
                 setTimeout(function () {
-                    if ((current >= date.getTime())) {
-                        event.pending = false;
-                        console.log(event.name + " | " + event.about);
-                    }
+                    event.pending = false;
+                    console.log(event.name + " | " + event.about);
                 }, refresh);
             } else {
                 event.pending = false;
@@ -56,22 +52,21 @@ var calendarModule = (function (api) {
         return true;
     };
     var _validateDate = function (date) {
-        var minYear = 2000,
-            maxYear = (new Date()).getFullYear(),
+        var currentYear = (new Date()).getFullYear(),
             errorMsg = "",
             regs = [],
             re = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
         if (date !== '') {
             if (date.match(re)) {
                 regs = date.match(re);
-                if (regs[1] < 1 || regs[1] > 31) {
-                    errorMsg += "Invalid value for day: " + regs[1] + "\n";
-                }
-                if (regs[2] < 1 || regs[2] > 12) {
+                if (regs[1] < 1 || regs[1] > 12) {
                     errorMsg += "Invalid value for month: " + regs[2] + "\n";
                 }
-                if (regs[3] < minYear || regs[3] > maxYear) {
-                    errorMsg += "Invalid value for year: " + regs[3] + " - must be between " + minYear + " and " + maxYear;
+                if (regs[2] < 1 || regs[2] > 31) {
+                    errorMsg += "Invalid value for day: " + regs[1] + "\n";
+                }
+                if (regs[3] != currentYear) {
+                    errorMsg += "Invalid value for year.";
                 }
             } else {
                 errorMsg = "Invalid date format: " + date;
