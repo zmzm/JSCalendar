@@ -2,11 +2,17 @@
 var extendedCalendarModule = (function () {
     var _weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
         _refreshQueue = [],
-        api = {};
+        api = {},
+        ONE_HOUR = 3600000,
+        ONE_SECOND = 1000,
+        ONE_MINUTE = 60000,
+        MIN_MINUTES = 5,
+        MAX_MINUTES = 50,
+        DAYS_IN_WEEK = 7;
     var _currentWeekDates = function (date) {
         var array = [],
             temp = new Date(date);
-        for (var i = 1; i < 8; i++) {
+        for (var i = 1; i <= DAYS_IN_WEEK; i++) {
             array.push(new Date(temp.setDate(temp.getDate() - temp.getDay() + i)));
         }
         return array;
@@ -61,9 +67,6 @@ var extendedCalendarModule = (function () {
             minutes = date.getMinutes(),
             seconds = date.getSeconds(),
             hourDifferent = (hours > eventHour) ? -(hours - eventHour) : eventHour - hours,
-            millisecondsInOneHour = 3600000,
-            millisecondsInSecond = 1000,
-            millisecondsInMinute = 60000,
             minutesDifferent = hourDifferent == 1 ? eventMinute + (60 - (minutes)) : eventMinute - minutes;
         if (hours > eventHour) {
             tomorrow.setDate(date.getDate() + 1);
@@ -75,10 +78,10 @@ var extendedCalendarModule = (function () {
             refresh = tomorrow - date.getTime();
         } else {
             if (hourDifferent == 1) {
-                refresh = date.getTime() + (minutesDifferent * millisecondsInMinute) - (seconds * millisecondsInSecond);
+                refresh = date.getTime() + (minutesDifferent * ONE_MINUTE) - (seconds * ONE_SECOND);
                 refresh = refresh - date.getTime();
             } else {
-                refresh = date.getTime() + (hourDifferent * millisecondsInOneHour) + (minutesDifferent * millisecondsInMinute) - (seconds * millisecondsInSecond);
+                refresh = date.getTime() + (hourDifferent * ONE_HOUR) + (minutesDifferent * ONE_MINUTE) - (seconds * ONE_SECOND);
                 refresh = refresh - date.getTime();
             }
         }
@@ -91,10 +94,9 @@ var extendedCalendarModule = (function () {
     };
     var _beforeEvent = function (event, time, callback) {
         var refresh = 0,
-            millisecondsInMinute = 60000,
             current = new Date();
         if (event.pending) {
-            refresh = (event.startDate.getTime() - (time * millisecondsInMinute)) - current.getTime();
+            refresh = (event.startDate.getTime() - (time * ONE_MINUTE)) - current.getTime();
             if (refresh > 0) {
                 setTimeout(function () {
                     event.remindBefore = false;
@@ -140,7 +142,7 @@ var extendedCalendarModule = (function () {
         if (minutes !== '') {
             if (minutes.match(re)) {
                 regs = minutes.match(re);
-                if (regs[1] < 5 || regs[1] > 50) {
+                if (regs[1] < MIN_MINUTES || regs[1] > MAX_MINUTES) {
                     errorMsg = "Invalid value for minutes: " + regs[1] + " - must be between '5' and '50'";
                 }
             } else {
